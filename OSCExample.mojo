@@ -1,5 +1,5 @@
 from mmm_audio import *
-from mojosc.mojosc import OSCClient
+from mojosc import OSCClient
 
 struct OSCExample(Copyable, Movable):
     var world: World
