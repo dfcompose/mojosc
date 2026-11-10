@@ -39,18 +39,21 @@ struct OSCClient(Movable, Copyable):
     def close(mut self):
         self.udp_socket.close()
 
-
+    @always_inline
     def send_osc[address: String](self, vals: List[Int]) raises:
-        var addr_byte_array : Array[Byte, len(address.as_bytes()) + (4 - len(address.as_bytes()) % 4)] = Array[Byte, len(address.as_bytes()) + (4 - len(address.as_bytes()) % 4)](fill=0)
+        var addr_byte_array : Array[Byte, len(address.as_bytes())] = Array[Byte, len(address.as_bytes())](fill=0)
         var tags = List[UInt8]()
         
         
-        tags.resize(len(vals) + ( 4 - len(vals) % 4), 0)
-        for i in range(len(vals) + 1):
-            tags[i] = 105
-        tags[0] = 44
         
-        while len(tags) % 4 != 0:
+        tags.append(44)
+        for _ in range(len(vals)):
+            tags.append(105)
+        
+        
+        tags.append(0)
+
+        while len(tags) % 4:
             tags.append(0)
         
         comptime for i, byte in enumerate(address.as_bytes()):
@@ -58,16 +61,19 @@ struct OSCClient(Movable, Copyable):
 
         
 
-        while len(tags) % 4 != 0:
-            tags.append(0)
-
         var message = List[UInt8]() 
-        # message.resize(len(addr_byte_array), 0)
-        _ = [message.append(i) for i in addr_byte_array]
-        message = message + [i for i in tags]
-        # message += [0,0,0,0]
         
+        _ = [message.append(i) for i in addr_byte_array]
 
+        message.append(0)
+
+        while len(message) % 4:
+            message.append(0)
+
+        _ = [message.append(i) for i in tags]
+       
+        
+       
         for val in vals:
             var bytes = bitcast[DType.uint8, 4](Int32(val))
             bytes = bytes.shuffle[3, 2, 1, 0]()
@@ -75,36 +81,45 @@ struct OSCClient(Movable, Copyable):
             message.append(bytes[1])
             message.append(bytes[2])
             message.append(bytes[3])
+           
 
        
         self.udp_socket.send_to(message, self.target_addr)
 
 
     def send_osc[address: String](self, vals: List[Float64]) raises:
-        var addr_byte_array : Array[Byte, len(address.as_bytes()) + (4 - len(address.as_bytes()) % 4)] = Array[Byte, len(address.as_bytes()) + (4 - len(address.as_bytes()) % 4)](fill=0)
+        var addr_byte_array : Array[Byte, len(address.as_bytes())] = Array[Byte, len(address.as_bytes())](fill=0)
         var tags = List[UInt8]()
         
         
-        tags.resize(len(vals) + ( 4 - len(vals) % 4), 0)
-        for i in range(len(vals) + 1):
-            tags[i] = 102
-        tags[0] = 44
-        if len(vals) + (4 - len(vals) % 4) == 0:
-            tags.append(0)
-            tags.append(0)
-            tags.append(0)
+        
+        tags.append(44)
+        for _ in range(len(vals)):
+            tags.append(102)
+        
+        tags.append(0)
+
+        while len(tags) % 4:
             tags.append(0)
         
         comptime for i, byte in enumerate(address.as_bytes()):
                 addr_byte_array[i] = byte
 
-        var message = List[UInt8]() 
-        # message.resize(len(addr_byte_array), 0)
-        _ = [message.append(i) for i in addr_byte_array]
-        message = message + [i for i in tags]
-        # message += [0,0,0,0]
         
 
+        var message = List[UInt8]() 
+        
+        _ = [message.append(i) for i in addr_byte_array]
+
+        message.append(0)
+
+        while len(message) % 4:
+            message.append(0)
+
+        _ = [message.append(i) for i in tags]
+       
+        
+       
         for val in vals:
             var bytes = bitcast[DType.uint8, 4](Float32(val))
             bytes = bytes.shuffle[3, 2, 1, 0]()
@@ -112,6 +127,8 @@ struct OSCClient(Movable, Copyable):
             message.append(bytes[1])
             message.append(bytes[2])
             message.append(bytes[3])
-        
+           
+
+       
         self.udp_socket.send_to(message, self.target_addr)
     

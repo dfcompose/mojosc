@@ -6,7 +6,7 @@ struct OSCExample(Copyable, Movable):
     var messenger: Messenger
     var counter : Float64
     var osc_client: OSCClient
-    var ints : List[Int]
+    var ints : List[Float64]
     def __init__(out self, world: World) raises:
         self.world = world
         self.counter = 0
@@ -30,7 +30,8 @@ struct OSCExample(Copyable, Movable):
 
         self.messenger.address_callback[update_port]("update_port")
 
-        if self.counter % (self.world[].sample_rate * 3) == 0:
+        # Send a new OSC message out every block
+        if self.world[].top_of_block():
             self.osc_client.send_osc["/test"](self.ints)
         
         return MFloat[2](0)
