@@ -1,0 +1,3 @@
+[submodule "mojo-net"]
+	path = mojo-net
+	url = https://github.com/nsalerni/mojo-net.git
