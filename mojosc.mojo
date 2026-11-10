@@ -1,4 +1,4 @@
-from .mojonet.src.net import UDPSocket, SocketAddress
+from .mmmojonet.src.net import UDPSocket, SocketAddress
 from std.memory import bitcast
 
 
