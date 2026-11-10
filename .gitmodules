@@ -1,3 +1,6 @@
 [submodule "mojo-net"]
 	path = mojo-net
 	url = https://github.com/nsalerni/mojo-net.git
+[submodule "mmmojonet"]
+	path = mmmojonet
+	url = https://github.com/dfcompose/mmmojonet.git
